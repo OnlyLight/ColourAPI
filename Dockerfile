@@ -1,18 +1,17 @@
-
-# Get Base Image (Full .NET Core SDK)
-FROM mcr.microsoft.com/dotnet/core/sdk:2.2 AS build-env
+# Get base SDK Images from Microsoft
+FROM mcr.microsoft.com/dotnet/sdk:5.0-alpine AS build-env
 WORKDIR /app
 
-# Copy csproj and restore
+# Copy csproj and restore as distinct layers
 COPY *.csproj ./
 RUN dotnet restore
 
 # Copy everything else and build
 COPY . ./
-RUN dotnet publish -c Release -o out
+RUN dotnet publish --configuration Release -o out
 
-# Generate runtime image
-FROM mcr.microsoft.com/dotnet/core/aspnet:2.2
+# Build runtime image
+FROM mcr.microsoft.com/dotnet/aspnet:5.0-alpine
 WORKDIR /app
 EXPOSE 80
 COPY --from=build-env /app/out .
